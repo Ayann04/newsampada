@@ -1,7 +1,6 @@
 import time
 import re
 import os
-import easyocr  
 from openpyxl import Workbook, load_workbook
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -479,4 +478,5 @@ def show_captcha(request):
         "scraper_app/solve_captchas.html",
         {"status": latest_status,"captcha_value": captcha_value},
     )
+
 
