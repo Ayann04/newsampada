@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="5">
+    <title>Scraping Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fc;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .status-box {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        li {
+            background: #f0f4ff;
+            margin: 6px 0;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            background: #e74c3c;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #1e8449;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-box">
+        <h2>Scraping Status Updates</h2>
+
+        <ul>
+            {% for status in statuses %}
+                <li><strong>{{ status.created_at|date:"H:i:s" }}</strong> → {{ status.message }}</li>
+            {% empty %}
+                <li class="empty">No updates yet — your scraping progress will appear here.</li>
+            {% endfor %}
+        </ul>
+
+        <form method="post" action="{% url 'clear_logs' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn">Clear Logs</button>
+        </form>
+        <a href="{% url 'download_excel' %}" class="btn btn-success">Download Excel</a>
+    </div>
+</body>
+</html>

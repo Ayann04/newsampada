@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        img {
+            max-width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+            text-align: left;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #007BFF;
+            color: white;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .note {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Solve Captcha</h2>
+
+        {% if status and status.captcha_image %}
+            <p>{{ status.message }}</p>
+            <img src="{{ status.captcha_image.url }}?{{ timestamp }}" alt="Captcha Image">
+
+            <form method="post">
+                {% csrf_token %}
+                <label for="captcha_value">Enter Captcha</label>
+                <input type="text" id="captcha_value" name="captcha_value" placeholder="Type captcha here" required>
+                <button type="submit">Submit</button>
+            </form>
+
+            <p class="note">Enter the captcha shown above. When a new captcha arrives, it will replace this one.</p>
+        {% else %}
+            <p>No captcha available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

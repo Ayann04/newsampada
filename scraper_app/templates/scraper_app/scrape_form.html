@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scrape Sampada Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333333;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 40px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            color: #555555;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="date"],
+        select {
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            grid-column: span 2;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            width: 50%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.clicked {
+            background-color: #dc5115ff;
+        }
+
+        #message {
+            margin-top: 20px;
+            text-align: center;
+            color: #008000;
+            font-weight: bold;
+        }
+
+        #linking {
+            width: 50%;
+            padding: 12px;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            margin-top: 15px; /* spacing below button */
+            display: block;   /* make it act like button */
+        }
+
+        #linking:hover {
+            background-color: #0b00d4ff;
+        }
+
+        img.captcha {
+            width: auto;   /* adjust size */
+            height: auto;   /* keeps aspect ratio */
+            border: 2px solid #333;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trigger Sampada Data Scraping</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="district">District:</label>
+                    <select id="district" name="district" required>
+                        <option value="">-- Select District --</option>
+                        <option value="Indore">Indore</option>
+                        <option value="Bhopal">Bhopal</option>
+                        <!-- ... keep all your options here ... -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="deed_type">Deed Type:</label>
+                    <select id="deed_type" name="deed_type" required>
+                        <option value="">-- Select Deed Type --</option>
+                        <option value="Conveyance">Conveyance</option>
+                        <!-- ... keep all your options here ... -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date_from">Date From:</label>
+                    <input type="date" id="date_from" name="date_from" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date_to">Date To:</label>
+                    <input type="date" id="date_to" name="date_to" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="scrapeBtn">Start Scraping</button>
+                    <a id="linking" href="http://127.0.0.1:8000/get-status/" target="_blank">
+                        See Your Live Status Here
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const usernameField = document.getElementById("username");
+        const passwordField = document.getElementById("password");
+        const districtField = document.getElementById("district");
+        const deedField = document.getElementById("deed_type");
+        const dateFromField = document.getElementById("date_from");
+        const dateToField = document.getElementById("date_to");
+        const form = document.querySelector("form");
+        const messageBox = document.getElementById("message");
+        const scrapeBtn = document.getElementById("scrapeBtn");
+
+        function formatDate(date) {
+            const d = new Date(date);
+            const month = ("0" + (d.getMonth() + 1)).slice(-2);
+            const day = ("0" + d.getDate()).slice(-2);
+            return `${d.getFullYear()}-${month}-${day}`;
+        }
+
+        window.addEventListener("load", () => {
+            const savedUsername = localStorage.getItem("username");
+            const savedPassword = localStorage.getItem("password");
+            const savedDateFrom = localStorage.getItem("date_from");
+            const savedDateTo = localStorage.getItem("date_to");
+
+            if (savedUsername) usernameField.value = savedUsername;
+            if (savedPassword) passwordField.value = savedPassword;
+
+            const today = new Date();
+            const lastWeek = new Date();
+            lastWeek.setDate(today.getDate() - 7);
+
+            dateFromField.value = savedDateFrom || formatDate(lastWeek);
+            dateToField.value = savedDateTo || formatDate(today);
+
+            districtField.value = "Indore";
+            deedField.value = "Conveyance";
+        });
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            scrapeBtn.classList.add("clicked");
+            scrapeBtn.innerText = "Scraping Started...";
+
+            localStorage.setItem("username", usernameField.value);
+            localStorage.setItem("password", passwordField.value);
+            localStorage.setItem("date_from", dateFromField.value);
+            localStorage.setItem("date_to", dateToField.value);
+
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+            messageBox.innerText = data.message;
+
+            scrapeBtn.classList.remove("clicked");
+            scrapeBtn.innerText = "Start Scraping";
+        });
+    </script>
+</body>
+</html>
